@@ -19,6 +19,13 @@ expenses = [{
 
 results = {}
 
+def empty_analysis():
+  return {
+    'paid_for': dict(),
+    'owes_to': dict(),
+    'gets_from': dict()
+  }
+
 for expense in expenses:
 
   person = expense['person']
@@ -26,10 +33,10 @@ for expense in expenses:
 
   expense['paid_for'].discard(person)
 
-  results.setdefault(person, { 'paid_for': dict(), 'owes_to': dict(), 'gets_from': dict()})
+  results.setdefault(person, empty_analysis())
 
   for paid_for_person in expense['paid_for']:
-    results.setdefault(paid_for_person, { 'paid_for': dict(), 'owes_to': dict(), 'gets_from': dict()})
+    results.setdefault(paid_for_person, empty_analysis())
     
     results[person]['paid_for'].setdefault(paid_for_person, 0) 
     results[person]['paid_for'][paid_for_person] += price_per_sharer
