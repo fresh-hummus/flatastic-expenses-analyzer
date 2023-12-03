@@ -12,52 +12,48 @@ def empty_analysis():
   }
 
 def expense_from_row(csvrow):
-  price   = csvrow[4]
-  paid_by = csvrow[5]
-  sharers = csvrow[7]
+  paid_by   = csvrow[5]
+  sharers = set(csvrow[7].split(', '))
+  price_per_sharer = float(csvrow[4]) / len(sharers)
+
+  sharers.discard(paid_by)
 
   return {
-    'person': paid_by,
-    'price_per_sharer': float(price) / len(sharers.split(', ')),
-    'paid_for': set(sharers.split(', '))
+    'paid_by': paid_by,
+    'price_per_sharer': price_per_sharer,
+    'paid_for': sharers
   }
 
 def add_num_to_dict(dict_obj, key, value):
   dict_obj.setdefault(key, 0)
   dict_obj[key] += value
 
-def process_entries(entries):
-  return { person: f"{price:0.2f}"
-    for person, price
-    in entries.items()
-    if price > 0
-  }
+def add_expense_to_results(expense, results):
+  paid_by = expense['paid_by']
+  price = expense['price_per_sharer']
 
-def process_analysis(analysis):
+  results.setdefault(paid_by, empty_analysis())
+
+  for paid_for in expense['paid_for']:
+    results.setdefault(paid_for, empty_analysis())
+    
+    add_num_to_dict(results[paid_by]['paid_for'],   paid_for,  price)
+    add_num_to_dict(results[paid_by]['gets_from'],  paid_for,  price)
+    add_num_to_dict(results[paid_by]['owes_to'],    paid_for, -price)
+    add_num_to_dict(results[paid_for]['gets_from'], paid_by,  -price)
+    add_num_to_dict(results[paid_for]['owes_to'],   paid_by,   price)
+
+def pretty_analysis(analysis):
   return {
-    category: process_entries(entries)
+    category: {
+      person: f"{price:0.2f}"
+      for person, price
+      in entries.items()
+      if price > 0
+    }
     for category, entries
     in analysis.items()
   }
-
-def add_expense_to_results(expense, results):
-  person = expense['person']
-  price_per_sharer = expense['price_per_sharer']
-
-  expense['paid_for'].discard(person)
-
-  results.setdefault(person, empty_analysis())
-
-  for paid_for_person in expense['paid_for']:
-    results.setdefault(paid_for_person, empty_analysis())
-    
-    add_num_to_dict(results[person]['paid_for'],  paid_for_person,  price_per_sharer)
-    add_num_to_dict(results[person]['gets_from'], paid_for_person,  price_per_sharer)
-    add_num_to_dict(results[person]['owes_to'],   paid_for_person, -price_per_sharer)
-    add_num_to_dict(results[paid_for_person]['gets_from'], person, -price_per_sharer)
-    add_num_to_dict(results[paid_for_person]['owes_to'],   person,  price_per_sharer)
-
-    # print(f"{paid_by} paid {price_per_sharer:0.2f} EUR for {sharer}")
 
 csv_reader = csv.reader(sys.stdin)
 next(csv_reader)
@@ -69,7 +65,7 @@ for expense in expenses:
   add_expense_to_results(expense, results)
 
 results_pretty = {
-  person: process_analysis(analysis)
+  person: pretty_analysis(analysis)
   for person, analysis
   in results.items()
 }
