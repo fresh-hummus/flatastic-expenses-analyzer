@@ -1,0 +1,1 @@
+# flatastic-expenses-analyzer
