@@ -13,7 +13,8 @@ next(csv_reader)
 
 expenses = [{
   'person': row[INDEX_PAID_BY],
-  'price_per_sharer': float(row[INDEX_PRICE]) / len(row[INDEX_SHARERS].split(', ')),
+  'price_per_sharer':
+    float(row[INDEX_PRICE]) / len(row[INDEX_SHARERS].split(', ')),
   'paid_for': set(row[INDEX_SHARERS].split(', ')),
 } for row in csv_reader ]
 
