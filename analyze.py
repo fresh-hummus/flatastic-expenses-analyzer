@@ -2,7 +2,7 @@
 
 import csv
 import sys
-import yaml
+import ruamel.yaml as yaml
 
 INDEX_PRICE   = 4
 INDEX_PAID_BY = 5
@@ -68,4 +68,5 @@ results = {
   in results.items()
 }
 
-print(yaml.dump(results))
+output = yaml.dump(results)
+print(output.replace("'", ""))
