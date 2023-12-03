@@ -48,37 +48,24 @@ for expense in expenses:
 
     # print(f"{paid_by} paid {price_per_sharer:0.2f} EUR for {sharer}")
 
-def filter_func(pair):
-  return pair[1] > 0
+def process_entries(entries):
+  return { person: f"{price:0.2f}"
+    for person, price
+    in entries.items()
+    if price > 0
+  }
 
-def map_func(pair):
-  return (pair[0], f"{pair[1]:0.2f}")
+def process_analysis(analysis):
+  return {
+    category: process_entries(entries)
+    for category, entries
+    in analysis.items()
+  }
 
-
-for result in results.values():
-  result['owes_to'] = dict(filter(
-    filter_func,
-    result['owes_to'].items()
-  ))
-
-  result['owes_to'] = dict(map(
-    map_func,
-    result['owes_to'].items()
-  ))
-
-  result['paid_for'] = dict(map(
-    map_func,
-    result['paid_for'].items()
-  ))
-
-  result['gets_from'] = dict(filter(
-    filter_func,
-    result['gets_from'].items()
-  ))
-
-  result['gets_from'] = dict(map(
-    map_func,
-    result['gets_from'].items()
-  ))
+results = {
+  person: process_analysis(analysis)
+  for person, analysis
+  in results.items()
+}
 
 print(yaml.dump(results))
